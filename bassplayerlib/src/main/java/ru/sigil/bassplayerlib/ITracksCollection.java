@@ -7,5 +7,8 @@ package ru.sigil.bassplayerlib;
 
 public interface ITracksCollection {
     void add(ITrack mp3entity);
+
     void remove(ITrack mp3entity);
+
+    ITrack getNext(ITrack entity);
 }
