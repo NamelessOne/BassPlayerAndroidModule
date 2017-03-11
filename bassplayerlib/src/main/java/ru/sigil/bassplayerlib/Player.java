@@ -18,12 +18,12 @@ import java.util.Set;
  * Created by NamelessOne
  * on 17.09.2016.
  */
-public class Player implements IPlayer {
+public class Player<T extends IRadioStream> implements IPlayer<T> {
     private final Set<IPlayerEventListener> eventListeners = new HashSet<>();
     private final Set<IPLayerErrorListener> errorListeners = new HashSet<>();
     private String title;
     private String author;
-    private Bitrate bitrate = Bitrate.aac_16;
+    private T stream;
     private PlayState playState = PlayState.STOP;
     private boolean rec = false;
     private String recDirectory;
@@ -104,12 +104,12 @@ public class Player implements IPlayer {
         this.chan = chan;
     }
 
-    public void playAAC(String url, Bitrate bitrate) {
+    public void playAAC(T stream) {
         try {
             setPlayState(PlayState.PLAY);
             setTitle("Соединение...");
-            setBitrate(bitrate);
-            new Thread(new OpenURLAAC(url)).start();
+            setStream(stream);
+            new Thread(new OpenURLAAC(stream.getStreamURL())).start();
         } catch (Exception e) {
             setPlayState(PlayState.STOP);
             e.printStackTrace();
@@ -164,9 +164,10 @@ public class Player implements IPlayer {
         setPlayState(PlayState.PAUSE);
     }
 
-    public Player(ITracksCollection mp3Collection, ITrackFactory trackFactory) {
+    public Player(ITracksCollection mp3Collection, ITrackFactory trackFactory, T initialStream) {
         this.mp3Collection = mp3Collection;
         this.trackFactory = trackFactory;
+        this.stream = initialStream; //TODO избавиться от этого параметра в конструкторе
         BASS.BASS_Free();
         BASS.BASS_Init(-1, 44100, 0);
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_NET_PLAYLIST, 1);
@@ -219,8 +220,8 @@ public class Player implements IPlayer {
     }
 
     @Override
-    public Bitrate currentBitrate() {
-        return bitrate;
+    public T currentStream() {
+        return stream;
     }
 
     @Override
@@ -249,22 +250,20 @@ public class Player implements IPlayer {
         return rec;
     }
 
-    public void setBitrate(Bitrate bitrate) {
-        this.bitrate = bitrate;
+    public void setStream(T stream) {
+        this.stream = stream;
     }
 
     /**
      * Начинаем играть поток
-     *
-     * @param url URL потока. Не AAC
      */
     @Override
-    public void play(String url, Bitrate bitrate) {
+    public void play(T stream) {
         try {
             setPlayState(PlayState.PLAY);
             setTitle("Соединение...");
-            setBitrate(bitrate);
-            new Thread(new OpenURL(url)).start();
+            setStream(stream);
+            new Thread(new OpenURL(stream.getStreamURL())).start();
         } catch (Exception e) {
             e.printStackTrace();
         }

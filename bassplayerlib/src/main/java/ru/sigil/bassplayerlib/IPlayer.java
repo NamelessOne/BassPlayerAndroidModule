@@ -4,14 +4,14 @@ package ru.sigil.bassplayerlib;
  * Created by NamelessOne
  * on 17.09.2016.
  */
-public interface IPlayer {
+public interface IPlayer<T extends IRadioStream> {
     String[] RESERVED_CHARS = {"|", "\\", "?", "*", "<", "\"",
             ":", ">", "+", "[", "]", "/", "'", "%"};
 
     //TODO унифицировать play и playAAC
-    void play(String URL, Bitrate bitrate);
+    void play(T radioStream);
 
-    void playAAC(String URL, Bitrate bitrate);
+    void playAAC(T radioStream);
 
     void playFile(ITrack file);
 
@@ -19,9 +19,9 @@ public interface IPlayer {
 
     void stop();
 
-    void addEventListener(IPlayerEventListener listener);
+    void addEventListener(IPlayerEventListener<T> listener);
 
-    void removeEventListener(IPlayerEventListener listener);
+    void removeEventListener(IPlayerEventListener<T> listener);
 
     void removeErrorListener(IPLayerErrorListener listener);
 
@@ -33,11 +33,11 @@ public interface IPlayer {
 
     String currentArtist();
 
-    Bitrate currentBitrate();
+    T currentStream();
 
     PlayState currentState();
 
-    void setBitrate(Bitrate bitrate);
+    void setStream(T stream);
 
     boolean isRecActive();
 
