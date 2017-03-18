@@ -12,3 +12,4 @@ android:
 script:
    - chmod +x ./gradlew
    - ./gradlew build connectedCheck
+   - ./gradlew test
