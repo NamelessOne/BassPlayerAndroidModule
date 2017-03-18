@@ -8,4 +8,5 @@ android:
     - android-25
 
 script:
+   - chmod +x ./gradlew
    - ./gradlew build connectedCheck
