@@ -182,6 +182,7 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
     public void stop() {
         //TODO BASS.BASS_ChannelStop(getChan()); ???
         BASS.BASS_StreamFree(getChan());
+        rec(false);
         setAuthor("");
         setTitle("");
         setPlayState(PlayState.STOP);
@@ -244,9 +245,6 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
         }
         //TODO ???
         if (state != PlayState.PLAY && state != PlayState.BUFFERING) {
-            if (rec) {
-                saveRecInfoToDatabase();
-            }
             setRecActive(false);
         }
     }
