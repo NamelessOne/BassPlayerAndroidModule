@@ -45,16 +45,11 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
     @Override
     public void rec(boolean isActive) {
         // -------------------------------------
-        if(currentState()!=PlayState.PLAY && currentState()!=PlayState.BUFFERING)
-        {
+        if (currentState() != PlayState.PLAY && currentState() != PlayState.BUFFERING) {
             return;
         }
         if (!isActive) {
-            // А тут мы пишем инфу о записанном
-            // файле в базу
-            ITrack mp3Entity = trackFactory.createTrack(author, title, recDirectory, "");
-            mp3Collection.remove(mp3Entity);
-            mp3Collection.add(mp3Entity);
+            saveRecInfoToDatabase();
             //----------------------------------------------------
         } else {
             File dir = new File(Environment.getExternalStorageDirectory()
@@ -92,6 +87,14 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
         }
         // -------------------------------------
         setRecActive(isActive);
+    }
+
+    private void saveRecInfoToDatabase() {
+        // А тут мы пишем инфу о записанном
+        // файле в базу
+        ITrack mp3Entity = trackFactory.createTrack(author, title, recDirectory, "");
+        mp3Collection.remove(mp3Entity);
+        mp3Collection.add(mp3Entity);
     }
 
     @Override
@@ -146,7 +149,7 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
     }
 
     private void error(String message, int code) {
-        for (IPLayerErrorListener listener: errorListeners) {
+        for (IPLayerErrorListener listener : errorListeners) {
             listener.onError(message, code);
         }
     }
@@ -240,8 +243,12 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
             }
         }
         //TODO ???
-        if (state != PlayState.PLAY && state != PlayState.BUFFERING)
+        if (state != PlayState.PLAY && state != PlayState.BUFFERING) {
+            if (rec) {
+                saveRecInfoToDatabase();
+            }
             setRecActive(false);
+        }
     }
 
     @Override
