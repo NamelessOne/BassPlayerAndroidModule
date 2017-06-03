@@ -182,7 +182,9 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
     public void stop() {
         //TODO BASS.BASS_ChannelStop(getChan()); ???
         BASS.BASS_StreamFree(getChan());
-        rec(false);
+        if (rec) {
+            rec(false);
+        }
         setAuthor("");
         setTitle("");
         setPlayState(PlayState.STOP);
