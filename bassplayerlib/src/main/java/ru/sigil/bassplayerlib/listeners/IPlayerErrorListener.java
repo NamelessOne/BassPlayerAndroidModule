@@ -1,10 +1,10 @@
-package ru.sigil.bassplayerlib;
+package ru.sigil.bassplayerlib.listeners;
 
 /**
  * Created by NamelessOne
  * on 08.10.2016.
  */
 
-public interface IPLayerErrorListener {
+public interface IPlayerErrorListener {
     void onError(String message, int errorCode);
 }

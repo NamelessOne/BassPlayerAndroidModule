@@ -1,5 +1,15 @@
 package ru.sigil.bassplayerlib;
 
+import ru.sigil.bassplayerlib.listeners.IAuthorChangedListener;
+import ru.sigil.bassplayerlib.listeners.IBufferingProgressListener;
+import ru.sigil.bassplayerlib.listeners.IEndSyncListener;
+import ru.sigil.bassplayerlib.listeners.IPlayStateChangedListener;
+import ru.sigil.bassplayerlib.listeners.IPlayerErrorListener;
+import ru.sigil.bassplayerlib.listeners.IRecStateChangedListener;
+import ru.sigil.bassplayerlib.listeners.IStreamChangedListener;
+import ru.sigil.bassplayerlib.listeners.ITitleChangedListener;
+import ru.sigil.bassplayerlib.listeners.IVolumeChangedListener;
+
 /**
  * Created by NamelessOne
  * on 17.09.2016.
@@ -19,13 +29,41 @@ public interface IPlayer<T extends IRadioStream> {
 
     void stop();
 
-    void addEventListener(IPlayerEventListener<T> listener);
+    void addAuthorChangedListener(IAuthorChangedListener listener);
 
-    void removeEventListener(IPlayerEventListener<T> listener);
+    void removeAuthorChangedListener(IAuthorChangedListener listener);
 
-    void removeErrorListener(IPLayerErrorListener listener);
+    void addBufferingProgressChangedListener(IBufferingProgressListener listener);
 
-    void addErrorListener(IPLayerErrorListener listener);
+    void removeBufferingProgressChangedListener(IBufferingProgressListener listener);
+
+    void addEndSyncChangedListener(IEndSyncListener listener);
+
+    void removeEndSyncChangedListener(IEndSyncListener listener);
+
+    void addPlayerErrorChangedListener(IPlayerErrorListener listener);
+
+    void removePlayerErrorChangedListener(IPlayerErrorListener listener);
+
+    void addPlayStateChangedListener(IPlayStateChangedListener listener);
+
+    void removePlayStateChangedListener(IPlayStateChangedListener listener);
+
+    void addRecStateChangedListener(IRecStateChangedListener listener);
+
+    void removeRecStateChangedListener(IRecStateChangedListener listener);
+
+    void addStreamChangedListener(IStreamChangedListener<T> listener);
+
+    void removeStreamChangedListener(IStreamChangedListener<T> listener);
+
+    void addTitleChangedListener(ITitleChangedListener listener);
+
+    void removeTitleChangedListener(ITitleChangedListener listener);
+
+    void addVolumeChangedListener(IVolumeChangedListener listener);
+
+    void removeVolumeChangedListener(IVolumeChangedListener listener);
 
     void removeAllListeners();
 

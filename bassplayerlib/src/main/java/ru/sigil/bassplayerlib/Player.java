@@ -14,13 +14,32 @@ import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Set;
 
+import ru.sigil.bassplayerlib.listeners.IAuthorChangedListener;
+import ru.sigil.bassplayerlib.listeners.IBufferingProgressListener;
+import ru.sigil.bassplayerlib.listeners.IEndSyncListener;
+import ru.sigil.bassplayerlib.listeners.IPlayStateChangedListener;
+import ru.sigil.bassplayerlib.listeners.IPlayerErrorListener;
+import ru.sigil.bassplayerlib.listeners.IRecStateChangedListener;
+import ru.sigil.bassplayerlib.listeners.IStreamChangedListener;
+import ru.sigil.bassplayerlib.listeners.ITitleChangedListener;
+import ru.sigil.bassplayerlib.listeners.IVolumeChangedListener;
+
 /**
  * Created by NamelessOne
  * on 17.09.2016.
  */
 public class Player<T extends IRadioStream> implements IPlayer<T> {
-    private final Set<IPlayerEventListener> eventListeners = new HashSet<>();
-    private final Set<IPLayerErrorListener> errorListeners = new HashSet<>();
+
+    private final Set<IAuthorChangedListener> authorChangedEventListeners = new HashSet<>();
+    private final Set<IBufferingProgressListener> bufferingProgressEventListeners = new HashSet<>();
+    private final Set<IEndSyncListener> endSyncEventListeners = new HashSet<>();
+    private final Set<IPlayerErrorListener> playerErrorEventListeners = new HashSet<>();
+    private final Set<IPlayStateChangedListener> playStateChangedListeners = new HashSet<>();
+    private final Set<IRecStateChangedListener> recStateChangedListeners = new HashSet<>();
+    private final Set<IStreamChangedListener<T>> streamChangedListeners = new HashSet<>();
+    private final Set<ITitleChangedListener> titleChangedListeners = new HashSet<>();
+    private final Set<IVolumeChangedListener> volumeChangedListeners = new HashSet<>();
+
     private String title;
     private String author;
     private T stream;
@@ -149,7 +168,7 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
     }
 
     private void error(String message, int code) {
-        for (IPLayerErrorListener listener : errorListeners) {
+        for (IPlayerErrorListener listener : playerErrorEventListeners) {
             listener.onError(message, code);
         }
     }
@@ -170,7 +189,7 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
     public Player(ITracksCollection mp3Collection, ITrackFactory trackFactory, T initialStream) {
         this.mp3Collection = mp3Collection;
         this.trackFactory = trackFactory;
-        this.stream = initialStream; //TODO избавиться от этого параметра в конструкторе
+        this.setStream(initialStream);
         BASS.BASS_Free();
         BASS.BASS_Init(-1, 44100, 0);
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_NET_PLAYLIST, 1);
@@ -191,28 +210,104 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
     }
 
     @Override
-    public void addEventListener(IPlayerEventListener listener) {
-        eventListeners.add(listener);
+    public void addAuthorChangedListener(IAuthorChangedListener listener) {
+        authorChangedEventListeners.add(listener);
+    }
+
+    public void removeAuthorChangedListener(IAuthorChangedListener listener) {
+        authorChangedEventListeners.remove(listener);
     }
 
     @Override
-    public void removeEventListener(IPlayerEventListener listener) {
-        eventListeners.remove(listener);
+    public void addBufferingProgressChangedListener(IBufferingProgressListener listener) {
+        bufferingProgressEventListeners.add(listener);
+    }
+
+    public void removeBufferingProgressChangedListener(IBufferingProgressListener listener) {
+        bufferingProgressEventListeners.remove(listener);
     }
 
     @Override
-    public void removeErrorListener(IPLayerErrorListener listener) {
-        errorListeners.remove(listener);
+    public void addEndSyncChangedListener(IEndSyncListener listener) {
+        endSyncEventListeners.add(listener);
     }
 
     @Override
-    public void addErrorListener(IPLayerErrorListener listener) {
-        errorListeners.add(listener);
+    public void removeEndSyncChangedListener(IEndSyncListener listener) {
+        endSyncEventListeners.remove(listener);
+    }
+
+    @Override
+    public void addPlayerErrorChangedListener(IPlayerErrorListener listener) {
+        playerErrorEventListeners.add(listener);
+    }
+
+    @Override
+    public void removePlayerErrorChangedListener(IPlayerErrorListener listener) {
+        playerErrorEventListeners.remove(listener);
+    }
+
+    @Override
+    public void addPlayStateChangedListener(IPlayStateChangedListener listener) {
+        playStateChangedListeners.add(listener);
+    }
+
+    @Override
+    public void removePlayStateChangedListener(IPlayStateChangedListener listener) {
+        playStateChangedListeners.remove(listener);
+    }
+
+    @Override
+    public void addRecStateChangedListener(IRecStateChangedListener listener) {
+        recStateChangedListeners.add(listener);
+    }
+
+    @Override
+    public void removeRecStateChangedListener(IRecStateChangedListener listener) {
+        recStateChangedListeners.remove(listener);
+    }
+
+    @Override
+    public void addStreamChangedListener(IStreamChangedListener<T> listener) {
+        streamChangedListeners.add(listener);
+    }
+
+    @Override
+    public void removeStreamChangedListener(IStreamChangedListener<T> listener) {
+        streamChangedListeners.remove(listener);
+    }
+
+    @Override
+    public void addTitleChangedListener(ITitleChangedListener listener) {
+        titleChangedListeners.add(listener);
+    }
+
+    @Override
+    public void removeTitleChangedListener(ITitleChangedListener listener) {
+        titleChangedListeners.remove(listener);
+    }
+
+    @Override
+    public void addVolumeChangedListener(IVolumeChangedListener listener) {
+        volumeChangedListeners.add(listener);
+    }
+
+    @Override
+    public void removeVolumeChangedListener(IVolumeChangedListener listener) {
+        volumeChangedListeners.remove(listener);
     }
 
     @Override
     public void removeAllListeners() {
-        eventListeners.clear();
+        authorChangedEventListeners.clear();
+        bufferingProgressEventListeners.clear();
+        endSyncEventListeners.clear();
+        playerErrorEventListeners.clear();
+        playStateChangedListeners.clear();
+        recStateChangedListeners.clear();
+        streamChangedListeners.clear();
+        titleChangedListeners.clear();
+        volumeChangedListeners.clear();
     }
 
     @Override
@@ -238,14 +333,9 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
 
     private void setPlayState(PlayState state) {
         playState = state;
-        for (IPlayerEventListener listener : eventListeners) {
-            try {
-                listener.onPlayStateChanged(state);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        for (IPlayStateChangedListener listener : playStateChangedListeners) {
+            listener.onPlayStateChanged(state);
         }
-        //TODO ???
         if (state != PlayState.PLAY && state != PlayState.BUFFERING) {
             setRecActive(false);
         }
@@ -259,6 +349,9 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
 
     public void setStream(T stream) {
         this.stream = stream;
+        for (IStreamChangedListener listener : streamChangedListeners) {
+            listener.onStreamChanged(stream);
+        }
     }
 
     /**
@@ -278,12 +371,8 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
 
     public void setRecActive(boolean recActive) {
         rec = recActive;
-        for (IPlayerEventListener listener : eventListeners) {
-            try {
-                listener.onRecStateChanged(recActive);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        for (IRecStateChangedListener listener : recStateChangedListeners) {
+            listener.onRecStateChanged(recActive);
         }
     }
 
@@ -294,12 +383,8 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
     @Override
     public void setVolume(float volume) {
         BASS.BASS_SetVolume(volume);
-        for (IPlayerEventListener listener : eventListeners) {
-            try {
-                listener.onVolumeChanged(volume);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        for (IVolumeChangedListener listener : volumeChangedListeners) {
+            listener.onVolumeChanged(volume);
         }
     }
 
@@ -465,35 +550,22 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
     };
 
     private void setBufferingProgress(long progress) {
-        for (IPlayerEventListener listener : eventListeners) {
-            try {
-                listener.onBufferingProgress(progress);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        for (IBufferingProgressListener listener : bufferingProgressEventListeners) {
+            listener.onBufferingProgress(progress);
         }
     }
 
     private void setTitle(String title) {
         this.title = title;
-        for (IPlayerEventListener listener : eventListeners) {
-            try {
-                listener.onTitleChanged(title);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        for (ITitleChangedListener listener : titleChangedListeners) {
+            listener.onTitleChanged(title);
         }
     }
 
     private void setAuthor(String author) {
         this.author = author;
-        //List<IPlayerEventListener> wrongListeners = new ArrayList<>();
-        for (IPlayerEventListener listener : eventListeners) {
-            try {
-                listener.onAuthorChanged(author);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        for (IAuthorChangedListener listener : authorChangedEventListeners) {
+            listener.onAuthorChanged(author);
         }
     }
 
@@ -555,12 +627,8 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
 
     private BASS.SYNCPROC EndSync = new BASS.SYNCPROC() {
         public void SYNCPROC(int handle, int channel, int data, Object user) {
-            for (IPlayerEventListener listener : eventListeners) {
-                try {
-                    listener.endSync();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            for (IEndSyncListener listener : endSyncEventListeners) {
+                listener.endSync();
             }
         }
     };
