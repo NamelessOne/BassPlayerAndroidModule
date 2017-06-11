@@ -37,13 +37,13 @@ public interface IPlayer<T extends IRadioStream> {
 
     void removeBufferingProgressChangedListener(IBufferingProgressListener listener);
 
-    void addEndSyncChangedListener(IEndSyncListener listener);
+    void addEndSyncListener(IEndSyncListener listener);
 
-    void removeEndSyncChangedListener(IEndSyncListener listener);
+    void removeEndSyncListener(IEndSyncListener listener);
 
-    void addPlayerErrorChangedListener(IPlayerErrorListener listener);
+    void addPlayerErrorListener(IPlayerErrorListener listener);
 
-    void removePlayerErrorChangedListener(IPlayerErrorListener listener);
+    void removePlayerErrorListener(IPlayerErrorListener listener);
 
     void addPlayStateChangedListener(IPlayStateChangedListener listener);
 

@@ -228,22 +228,22 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
     }
 
     @Override
-    public void addEndSyncChangedListener(IEndSyncListener listener) {
+    public void addEndSyncListener(IEndSyncListener listener) {
         endSyncEventListeners.add(listener);
     }
 
     @Override
-    public void removeEndSyncChangedListener(IEndSyncListener listener) {
+    public void removeEndSyncListener(IEndSyncListener listener) {
         endSyncEventListeners.remove(listener);
     }
 
     @Override
-    public void addPlayerErrorChangedListener(IPlayerErrorListener listener) {
+    public void addPlayerErrorListener(IPlayerErrorListener listener) {
         playerErrorEventListeners.add(listener);
     }
 
     @Override
-    public void removePlayerErrorChangedListener(IPlayerErrorListener listener) {
+    public void removePlayerErrorListener(IPlayerErrorListener listener) {
         playerErrorEventListeners.remove(listener);
     }
 
