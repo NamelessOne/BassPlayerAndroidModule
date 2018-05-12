@@ -21,6 +21,7 @@ import ru.sigil.bassplayerlib.listeners.IPlayStateChangedListener;
 import ru.sigil.bassplayerlib.listeners.IPlayerErrorListener;
 import ru.sigil.bassplayerlib.listeners.IRecStateChangedListener;
 import ru.sigil.bassplayerlib.listeners.IStreamChangedListener;
+import ru.sigil.bassplayerlib.listeners.ISyncStallListener;
 import ru.sigil.bassplayerlib.listeners.ITitleChangedListener;
 import ru.sigil.bassplayerlib.listeners.IVolumeChangedListener;
 
@@ -39,6 +40,7 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
     private final Set<IStreamChangedListener<T>> streamChangedListeners = new HashSet<>();
     private final Set<ITitleChangedListener> titleChangedListeners = new HashSet<>();
     private final Set<IVolumeChangedListener> volumeChangedListeners = new HashSet<>();
+    private final Set<ISyncStallListener> syncStallListeners = new HashSet<>();
 
     private String title;
     private String author;
@@ -298,6 +300,16 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
     }
 
     @Override
+    public void addSyncStallListener(ISyncStallListener listener) {
+        syncStallListeners.add(listener);
+    }
+
+    @Override
+    public void removeSyncStallListener(ISyncStallListener listener) {
+        syncStallListeners.remove(listener);
+    }
+
+    @Override
     public void removeAllListeners() {
         authorChangedEventListeners.clear();
         bufferingProgressEventListeners.clear();
@@ -308,6 +320,7 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
         streamChangedListeners.clear();
         titleChangedListeners.clear();
         volumeChangedListeners.clear();
+        syncStallListeners.clear();
     }
 
     @Override
@@ -537,9 +550,10 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
                         BASS.BASS_SYNC_META, 0, MetaSync, 0); // Shoutcast
                 BASS.BASS_ChannelSetSync(getChan(),
                         BASS.BASS_SYNC_OGG_CHANGE, 0, MetaSync, 0); // Icecast/OGG
+                // set sync for stalling/buffering
+                BASS.BASS_ChannelSetSync(getChan(), BASS.BASS_SYNC_STALL, 0, StallSync, 0);
                 // set sync for end of stream
-                BASS.BASS_ChannelSetSync(getChan(),
-                        BASS.BASS_SYNC_END, 0, EndSync, 0);
+                BASS.BASS_ChannelSetSync(getChan(), BASS.BASS_SYNC_END, 0, EndSync, 0);
                 // PLAY it!
                 BASS.BASS_ChannelPlay(getChan(), false);
             } else {
@@ -622,9 +636,8 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
     };
 
     /**
-     * Выполняется после завершения проигрывания. В данный момент не используестя
+     * Выполняется после завершения проигрывания.
      */
-
     private BASS.SYNCPROC EndSync = new BASS.SYNCPROC() {
         public void SYNCPROC(int handle, int channel, int data, Object user) {
             for (IEndSyncListener listener : endSyncEventListeners) {
@@ -660,6 +673,19 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
                 } catch (Exception e1) {
                     e1.printStackTrace();
                 }
+            }
+        }
+    };
+
+    /**
+     Выполняется при остановке воспроизведения
+     */
+    BASS.SYNCPROC StallSync = new BASS.SYNCPROC() {
+        public void SYNCPROC(int handle, int channel, int data, Object user) {
+            if (data==0) // stalled
+                handler.postDelayed(timer, 50); // start buffer monitoring
+            for (ISyncStallListener listener : syncStallListeners) {
+                listener.onSyncStall();
             }
         }
     };

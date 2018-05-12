@@ -7,6 +7,7 @@ import ru.sigil.bassplayerlib.listeners.IPlayStateChangedListener;
 import ru.sigil.bassplayerlib.listeners.IPlayerErrorListener;
 import ru.sigil.bassplayerlib.listeners.IRecStateChangedListener;
 import ru.sigil.bassplayerlib.listeners.IStreamChangedListener;
+import ru.sigil.bassplayerlib.listeners.ISyncStallListener;
 import ru.sigil.bassplayerlib.listeners.ITitleChangedListener;
 import ru.sigil.bassplayerlib.listeners.IVolumeChangedListener;
 
@@ -64,6 +65,10 @@ public interface IPlayer<T extends IRadioStream> {
     void addVolumeChangedListener(IVolumeChangedListener listener);
 
     void removeVolumeChangedListener(IVolumeChangedListener listener);
+
+    void addSyncStallListener(ISyncStallListener listener);
+
+    void removeSyncStallListener(ISyncStallListener listener);
 
     void removeAllListeners();
 
