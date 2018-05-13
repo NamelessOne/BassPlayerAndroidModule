@@ -52,6 +52,7 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
     private ITrack currentMP3Entity;
     //TODO вынести наружу, делать через Event
     private ITracksCollection mp3Collection;
+    private boolean isAAC = false; //TODO сделать нормальный enum
 
     private int chan;
 
@@ -130,6 +131,7 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
 
     public void playAAC(T stream) {
         try {
+            isAAC = true;
             setPlayState(PlayState.PLAY);
             setTitle("Соединение...");
             setStream(stream);
@@ -373,6 +375,7 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
     @Override
     public void play(T stream) {
         try {
+            isAAC = false;
             setPlayState(PlayState.PLAY);
             setTitle("Соединение...");
             setStream(stream);
@@ -550,6 +553,9 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
                         BASS.BASS_SYNC_META, 0, MetaSync, 0); // Shoutcast
                 BASS.BASS_ChannelSetSync(getChan(),
                         BASS.BASS_SYNC_OGG_CHANGE, 0, MetaSync, 0); // Icecast/OGG
+                //End_Sync
+                BASS.BASS_ChannelSetSync(getChan(), BASS.BASS_SYNC_DOWNLOAD, 0,
+                        DownloadSync, null);
                 // set sync for stalling/buffering
                 BASS.BASS_ChannelSetSync(getChan(), BASS.BASS_SYNC_STALL, 0, StallSync, 0);
                 // set sync for end of stream
@@ -680,12 +686,35 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
     /**
      Выполняется при остановке воспроизведения
      */
-    BASS.SYNCPROC StallSync = new BASS.SYNCPROC() {
+    private BASS.SYNCPROC StallSync = new BASS.SYNCPROC() {
         public void SYNCPROC(int handle, int channel, int data, Object user) {
             if (data==0) // stalled
                 handler.postDelayed(timer, 50); // start buffer monitoring
             for (ISyncStallListener listener : syncStallListeners) {
                 listener.onSyncStall();
+            }
+        }
+    };
+
+    /**
+     Выполняется при остановке воспроизведения
+     */
+    private BASS.SYNCPROC DownloadSync = new BASS.SYNCPROC() {
+        public void SYNCPROC(int handle, int channel, int data, Object user) {
+            try {
+                stop();
+                Thread.sleep(3000);
+                if(isAAC)
+                {
+                    playAAC(stream);
+                }
+                else
+                {
+                    play(stream);
+                }
+            }catch (Exception e)
+            {
+                e.printStackTrace();
             }
         }
     };
