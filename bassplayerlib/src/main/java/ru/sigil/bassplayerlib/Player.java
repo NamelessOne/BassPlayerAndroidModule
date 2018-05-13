@@ -635,6 +635,11 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
             for (IEndSyncListener listener : endSyncEventListeners) {
                 listener.endSync();
             }
+            IRadioStream stream = currentStream();
+            if(stream!=null) {
+                stop();
+                playStream((T)stream);
+            }
 
         }
     };
@@ -646,11 +651,6 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
         public void SYNCPROC(int handle, int channel, int data, Object user) {
             for (IEndSyncListener listener : endSyncEventListeners) {
                 listener.endSync();
-            }
-            IRadioStream stream = currentStream();
-            if(stream!=null) {
-                stop();
-                playStream((T)stream);
             }
         }
     };
