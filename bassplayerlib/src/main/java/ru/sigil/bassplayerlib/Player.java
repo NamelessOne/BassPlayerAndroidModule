@@ -680,12 +680,12 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
     /**
      Выполняется при остановке воспроизведения
      */
-    BASS.SYNCPROC StallSync = new BASS.SYNCPROC() {
+    private BASS.SYNCPROC StallSync = new BASS.SYNCPROC() {
         public void SYNCPROC(int handle, int channel, int data, Object user) {
             if (data==0) // stalled
                 handler.postDelayed(timer, 50); // start buffer monitoring
             for (ISyncStallListener listener : syncStallListeners) {
-                listener.onSyncStall();
+                listener.onSyncStall(data);
             }
         }
     };

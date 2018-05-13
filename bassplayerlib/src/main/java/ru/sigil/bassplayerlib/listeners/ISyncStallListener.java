@@ -6,5 +6,5 @@ package ru.sigil.bassplayerlib.listeners;
  */
 
 public interface ISyncStallListener {
-    void onSyncStall();
+    void onSyncStall(int data);
 }
