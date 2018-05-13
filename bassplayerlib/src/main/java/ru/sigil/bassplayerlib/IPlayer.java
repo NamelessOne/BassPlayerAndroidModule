@@ -19,10 +19,7 @@ public interface IPlayer<T extends IRadioStream> {
     String[] RESERVED_CHARS = {"|", "\\", "?", "*", "<", "\"",
             ":", ">", "+", "[", "]", "/", "'", "%"};
 
-    //TODO унифицировать play и playAAC
-    void play(T radioStream);
-
-    void playAAC(T radioStream);
+    void playStream(T radioStream);
 
     void playFile(ITrack file);
 

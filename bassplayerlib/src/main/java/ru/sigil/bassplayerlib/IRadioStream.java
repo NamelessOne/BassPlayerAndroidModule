@@ -7,4 +7,5 @@ package ru.sigil.bassplayerlib;
 
 public interface IRadioStream {
     String getStreamURL();
+    StreamFormat getStreamFormat();
 }

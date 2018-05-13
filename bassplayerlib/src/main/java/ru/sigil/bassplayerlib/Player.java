@@ -128,18 +128,6 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
         this.chan = chan;
     }
 
-    public void playAAC(T stream) {
-        try {
-            setPlayState(PlayState.PLAY);
-            setTitle("Соединение...");
-            setStream(stream);
-            new Thread(new OpenURLAAC(stream.getStreamURL())).start();
-        } catch (Exception e) {
-            setPlayState(PlayState.STOP);
-            e.printStackTrace();
-        }
-    }
-
     @Override
     public void playFile(ITrack entity) {
         //TODO
@@ -165,7 +153,7 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
         setChan(x);
         BASS.BASS_ChannelPlay(getChan(), false);
         BASS.BASS_ChannelSetSync(getChan(), BASS.BASS_SYNC_END, 0,
-                EndSync, null);
+                EndSyncFile, null);
         setPlayState(PlayState.PLAY_FILE);
     }
 
@@ -371,12 +359,16 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
      * Начинаем играть поток
      */
     @Override
-    public void play(T stream) {
+    public void playStream(T stream) {
         try {
             setPlayState(PlayState.PLAY);
             setTitle("Соединение...");
             setStream(stream);
-            new Thread(new OpenURL(stream.getStreamURL())).start();
+            if (stream.getStreamFormat() == StreamFormat.aac) {
+                new Thread(new OpenURLAAC(stream.getStreamURL())).start();
+            } else {
+                new Thread(new OpenURL(stream.getStreamURL())).start();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -636,12 +628,29 @@ public class Player<T extends IRadioStream> implements IPlayer<T> {
     };
 
     /**
-     * Выполняется после завершения проигрывания.
+     * Выполняется после завершения проигрывания потока.
      */
     private BASS.SYNCPROC EndSync = new BASS.SYNCPROC() {
         public void SYNCPROC(int handle, int channel, int data, Object user) {
             for (IEndSyncListener listener : endSyncEventListeners) {
                 listener.endSync();
+            }
+
+        }
+    };
+
+    /**
+     * Выполняется после завершения проигрывания файла.
+     */
+    private BASS.SYNCPROC EndSyncFile = new BASS.SYNCPROC() {
+        public void SYNCPROC(int handle, int channel, int data, Object user) {
+            for (IEndSyncListener listener : endSyncEventListeners) {
+                listener.endSync();
+            }
+            IRadioStream stream = currentStream();
+            if(stream!=null) {
+                stop();
+                playStream((T)stream);
             }
         }
     };
