@@ -91,7 +91,8 @@ public class BASS
 	public static final int BASS_CONFIG_NET_SEEK = 56;
 	public static final int BASS_CONFIG_AM_DISABLE = 58;
 	public static final int BASS_CONFIG_NET_PLAYLIST_DEPTH = 59;
-	public static final int BASS_CONFIG_NET_PREBUF_WAIT	= 60;
+	public static final int BASS_CONFIG_NET_PREBUF_WAIT = 60;
+	public static final int BASS_CONFIG_ANDROID_SESSIONID = 62;
 
 	// BASS_SetConfigPtr options
 	public static final int BASS_CONFIG_NET_AGENT = 16;
@@ -374,6 +375,7 @@ public class BASS
 	public static final int BASS_SYNC_MUSICINST = 1;
 	public static final int BASS_SYNC_MUSICFX = 3;
 	public static final int BASS_SYNC_OGG_CHANGE = 12;
+	public static final int BASS_SYNC_DEV_FAIL = 14;
 	public static final int BASS_SYNC_MIXTIME = 0x40000000;	// flag: sync at mixtime, else at playtime
 	public static final int BASS_SYNC_ONETIME = 0x80000000;	// flag: sync only once, else continuously
 
@@ -419,6 +421,7 @@ public class BASS
 	public static final int BASS_ACTIVE_PLAYING =1;
 	public static final int BASS_ACTIVE_STALLED = 2;
 	public static final int BASS_ACTIVE_PAUSED = 3;
+	public static final int BASS_ACTIVE_PAUSED_DEVICE = 4;
 
 	// Channel attributes
 	public static final int BASS_ATTRIB_FREQ = 1;
@@ -629,6 +632,7 @@ public class BASS
 	public static native boolean BASS_Start();
 	public static native boolean BASS_Stop();
 	public static native boolean BASS_Pause();
+	public static native boolean BASS_IsStarted();
 	public static native boolean BASS_SetVolume(float volume);
 	public static native float BASS_GetVolume();
 
@@ -661,7 +665,6 @@ public class BASS
 	public static native boolean BASS_MusicFree(int handle);
 
 	public static native int BASS_StreamCreate(int freq, int chans, int flags, STREAMPROC proc, Object user);
-	public static native int BASS_StreamCreate(int freq, int chans, int flags, int proc, Object user);
 	public static native int BASS_StreamCreateFile(String file, long offset, long length, int flags);
 	public static native int BASS_StreamCreateFile(ByteBuffer file, long offset, long length, int flags);
 	public static native int BASS_StreamCreateFile(Asset asset, long offset, long length, int flags);
@@ -726,6 +729,11 @@ public class BASS
 	public static native boolean BASS_FXReset(int handle);
 	public static native boolean BASS_FXSetPriority(int handle, int priority);
 
+	static native int BASS_StreamCreateConst(int freq, int chans, int flags, int proc, Object user);
+	public static int BASS_StreamCreate(int freq, int chans, int flags, int proc, Object user) {
+		return BASS_StreamCreateConst(freq, chans, flags, proc, user);
+	}
+	
 	public static class Utils {
 		public static int LOBYTE(int n) { return n&0xff; }
 		public static int HIBYTE(int n) { return (n>>8)&0xff; }
