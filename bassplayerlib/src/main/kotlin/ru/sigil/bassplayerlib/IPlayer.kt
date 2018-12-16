@@ -9,7 +9,6 @@ import ru.sigil.bassplayerlib.listeners.*
 interface IPlayer<T : IRadioStream> {
     val title: String?
     val author: String?
-    val stream: T?
     val playState: PlayState
     val isRecActive: Boolean
     val chan: Int
@@ -19,6 +18,7 @@ interface IPlayer<T : IRadioStream> {
 
     var volume: Float
     var progress: Long
+    var stream: T?
 
     fun playStream(radioStream: T)
     fun playFile(file: ITrack)
