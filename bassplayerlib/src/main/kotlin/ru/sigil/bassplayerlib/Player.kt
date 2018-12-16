@@ -19,6 +19,19 @@ import java.util.HashSet
 
 class Player<T : IRadioStream>(private val mp3Collection: ITracksCollection, private val trackFactory: ITrackFactory, initialStream: T) : IPlayer<T> {
 
+    private val reservedChars = arrayOf("|", "\\", "?", "*", "<", "\"", ":", ">", "+", "[", "]", "/", "'", "%")
+
+    private val authorChangedEventListeners = HashSet<IAuthorChangedListener>()
+    private val bufferingProgressEventListeners = HashSet<IBufferingProgressListener>()
+    private val endSyncEventListeners = HashSet<IEndSyncListener>()
+    private val playerErrorEventListeners = HashSet<IPlayerErrorListener>()
+    private val playStateChangedListeners = HashSet<IPlayStateChangedListener>()
+    private val recStateChangedListeners = HashSet<IRecStateChangedListener>()
+    private val streamChangedListeners = HashSet<IStreamChangedListener<T>>()
+    private val titleChangedListeners = HashSet<ITitleChangedListener>()
+    private val volumeChangedListeners = HashSet<IVolumeChangedListener>()
+    private val syncStallListeners = HashSet<ISyncStallListener>()
+
     override var stream: T? = null
         set(value) {
             field = value
@@ -35,19 +48,6 @@ class Player<T : IRadioStream>(private val mp3Collection: ITracksCollection, pri
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_NET_PREBUF, 0)
         BASS.BASS_SetVolume(0.5.toFloat())
     }
-
-    private val reservedChars = arrayOf("|", "\\", "?", "*", "<", "\"", ":", ">", "+", "[", "]", "/", "'", "%")
-
-    private val authorChangedEventListeners = HashSet<IAuthorChangedListener>()
-    private val bufferingProgressEventListeners = HashSet<IBufferingProgressListener>()
-    private val endSyncEventListeners = HashSet<IEndSyncListener>()
-    private val playerErrorEventListeners = HashSet<IPlayerErrorListener>()
-    private val playStateChangedListeners = HashSet<IPlayStateChangedListener>()
-    private val recStateChangedListeners = HashSet<IRecStateChangedListener>()
-    private val streamChangedListeners = HashSet<IStreamChangedListener<T>>()
-    private val titleChangedListeners = HashSet<ITitleChangedListener>()
-    private val volumeChangedListeners = HashSet<IVolumeChangedListener>()
-    private val syncStallListeners = HashSet<ISyncStallListener>()
 
     override var title: String? = null
         private set(value) {
