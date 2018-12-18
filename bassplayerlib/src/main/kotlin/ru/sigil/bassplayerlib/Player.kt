@@ -95,9 +95,9 @@ class Player<T : IRadioStream>(private val mp3Collection: ITracksCollection, pri
     override var volume: Float
         get() = BASS.BASS_GetVolume()
         set(value) {
-            BASS.BASS_SetVolume(volume)
+            BASS.BASS_SetVolume(value)
             for (listener in volumeChangedListeners) {
-                listener.onVolumeChanged(volume)
+                listener.onVolumeChanged(value)
             }
         }
 
@@ -105,7 +105,7 @@ class Player<T : IRadioStream>(private val mp3Collection: ITracksCollection, pri
         get() = BASS.BASS_ChannelGetPosition(chan, BASS.BASS_POS_BYTE) * 100 /
                 BASS.BASS_ChannelGetLength(chan, BASS.BASS_POS_BYTE)
         set(value) {
-            BASS.BASS_ChannelSetPosition(chan, progress * fileLength() / 100,
+            BASS.BASS_ChannelSetPosition(chan, value * fileLength() / 100,
                     BASS.BASS_POS_BYTE)
             if (BASS.BASS_ChannelIsActive(chan) != BASS.BASS_ACTIVE_PAUSED) {
                 BASS.BASS_ChannelPlay(chan, false)
