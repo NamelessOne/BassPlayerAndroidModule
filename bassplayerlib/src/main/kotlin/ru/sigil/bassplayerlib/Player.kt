@@ -57,8 +57,7 @@ class Player<T : IRadioStream>(private val mp3Collection: ITracksCollection, pri
             }
         }
     override var author: String? = null
-        private set(value)
-        {
+        private set(value) {
             field = value
             for (listener in authorChangedEventListeners) {
                 listener.onAuthorChanged(author!!)
@@ -105,7 +104,7 @@ class Player<T : IRadioStream>(private val mp3Collection: ITracksCollection, pri
         get() = BASS.BASS_ChannelGetPosition(chan, BASS.BASS_POS_BYTE) * 100 /
                 BASS.BASS_ChannelGetLength(chan, BASS.BASS_POS_BYTE)
         set(value) {
-            BASS.BASS_ChannelSetPosition(chan, value * fileLength() / 100,
+            BASS.BASS_ChannelSetPosition(chan, (value * (fileLength ?: 0)) / 100,
                     BASS.BASS_POS_BYTE)
             if (BASS.BASS_ChannelIsActive(chan) != BASS.BASS_ACTIVE_PAUSED) {
                 BASS.BASS_ChannelPlay(chan, false)
@@ -115,8 +114,16 @@ class Player<T : IRadioStream>(private val mp3Collection: ITracksCollection, pri
     override val isPaused
         get() = BASS.BASS_ChannelIsActive(chan) == BASS.BASS_ACTIVE_PAUSED
 
-    override val fileLength: Long
-        get() = BASS.BASS_ChannelGetLength(chan, BASS.BASS_POS_BYTE)
+    override val fileLength: Long?
+        get() {
+            try {
+                return BASS.BASS_ChannelGetLength(chan, BASS.BASS_POS_BYTE)
+            } catch (e: Exception) {
+                error("Error getting file length", BASS.BASS_ErrorGetCode(), e)
+            }
+
+            return null
+        }
 
     override fun rec(isActive: Boolean) {
         // -------------------------------------
@@ -160,7 +167,7 @@ class Player<T : IRadioStream>(private val mp3Collection: ITracksCollection, pri
 
     private fun saveRecInfoToDatabase() {
         // Save rec file info into database
-        if(recDirectory!= null) {
+        if (recDirectory != null) {
             val mp3Entity = trackFactory.createTrack(author, title, recDirectory!!, "")
             mp3Collection.remove(mp3Entity)
             mp3Collection.add(mp3Entity)
@@ -325,16 +332,6 @@ class Player<T : IRadioStream>(private val mp3Collection: ITracksCollection, pri
             error("Error playing stream", BASS.BASS_ErrorGetCode(), e)
         }
 
-    }
-
-    private fun fileLength(): Long {
-        try {
-            return BASS.BASS_ChannelGetLength(chan, BASS.BASS_POS_BYTE)
-        } catch (e: Exception) {
-            error("Error getting file length", BASS.BASS_ErrorGetCode(), e)
-        }
-
-        return 0
     }
 
     override fun resume() {
