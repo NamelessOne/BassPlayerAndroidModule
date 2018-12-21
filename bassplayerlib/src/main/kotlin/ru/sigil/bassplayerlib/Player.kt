@@ -105,11 +105,11 @@ class Player<T : IRadioStream>(private val mp3Collection: ITracksCollection, pri
                 BASS.BASS_ChannelGetLength(chan, BASS.BASS_POS_BYTE)
         set(value) {
             if(!BASS.BASS_ChannelSetPosition(chan, (value * fileLength) / 100,
-                    BASS.BASS_POS_BYTE))
-            {
+                    BASS.BASS_POS_BYTE)) {
                 error("Error set position", BASS.BASS_ErrorGetCode(), null)
             }
             if (BASS.BASS_ChannelIsActive(chan) != BASS.BASS_ACTIVE_PAUSED) {
+                BASS.BASS_ChannelPause(chan)
                 BASS.BASS_ChannelPlay(chan, false)
             }
         }
