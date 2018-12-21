@@ -104,8 +104,11 @@ class Player<T : IRadioStream>(private val mp3Collection: ITracksCollection, pri
         get() = BASS.BASS_ChannelGetPosition(chan, BASS.BASS_POS_BYTE) * 100 /
                 BASS.BASS_ChannelGetLength(chan, BASS.BASS_POS_BYTE)
         set(value) {
-            BASS.BASS_ChannelSetPosition(chan, (value * (fileLength ?: 0)) / 100,
-                    BASS.BASS_POS_BYTE)
+            if(!BASS.BASS_ChannelSetPosition(chan, (value * fileLength) / 100,
+                    BASS.BASS_POS_BYTE))
+            {
+                error("Error set position", BASS.BASS_ErrorGetCode(), null)
+            }
             if (BASS.BASS_ChannelIsActive(chan) != BASS.BASS_ACTIVE_PAUSED) {
                 BASS.BASS_ChannelPlay(chan, false)
             }
@@ -114,15 +117,9 @@ class Player<T : IRadioStream>(private val mp3Collection: ITracksCollection, pri
     override val isPaused
         get() = BASS.BASS_ChannelIsActive(chan) == BASS.BASS_ACTIVE_PAUSED
 
-    override val fileLength: Long?
+    override val fileLength: Long
         get() {
-            try {
                 return BASS.BASS_ChannelGetLength(chan, BASS.BASS_POS_BYTE)
-            } catch (e: Exception) {
-                error("Error getting file length", BASS.BASS_ErrorGetCode(), e)
-            }
-
-            return null
         }
 
     override fun rec(isActive: Boolean) {

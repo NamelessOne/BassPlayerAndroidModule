@@ -12,7 +12,7 @@ interface IPlayer<T : IRadioStream> {
     val playState: PlayState
     val isRecActive: Boolean
     val chan: Int
-    val fileLength: Long?
+    val fileLength: Long
     val isPaused: Boolean
     val currentMP3Entity: ITrack?
 
