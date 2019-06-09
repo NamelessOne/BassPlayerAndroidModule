@@ -1,6 +1,6 @@
 /*
 	BASS 2.4 Java class
-	Copyright (c) 1999-2018 Un4seen Developments Ltd.
+	Copyright (c) 1999-2019 Un4seen Developments Ltd.
 
 	See the BASS.CHM file for more detailed documentation
 */
@@ -97,6 +97,7 @@ public class BASS
 	// BASS_SetConfigPtr options
 	public static final int BASS_CONFIG_NET_AGENT = 16;
 	public static final int BASS_CONFIG_NET_PROXY = 17;
+	public static final int BASS_CONFIG_LIBSSL = 64;
 
 	// BASS_Init flags
 	public static final int BASS_DEVICE_8BITS = 1;	// 8 bit
@@ -322,6 +323,7 @@ public class BASS
 	public static final int STREAMPROC_DUMMY = 0;		// "dummy" stream
 	public static final int STREAMPROC_PUSH = -1;		// push stream
 	public static final int STREAMPROC_DEVICE = -2;		// device mix stream
+	public static final int STREAMPROC_DEVICE_3D = -3;	// device 3D mix stream
 
 	// BASS_StreamCreateFileUser file systems
 	public static final int STREAMFILE_NOBUFFER = 0;
@@ -376,6 +378,7 @@ public class BASS
 	public static final int BASS_SYNC_MUSICFX = 3;
 	public static final int BASS_SYNC_OGG_CHANGE = 12;
 	public static final int BASS_SYNC_DEV_FAIL = 14;
+	public static final int BASS_SYNC_DEV_FORMAT = 15;
 	public static final int BASS_SYNC_MIXTIME = 0x40000000;	// flag: sync at mixtime, else at playtime
 	public static final int BASS_SYNC_ONETIME = 0x80000000;	// flag: sync only once, else continuously
 
@@ -465,6 +468,7 @@ public class BASS
 	public static final int BASS_DATA_FFT_NOWINDOW = 0x20;	// FFT flag: no Hanning window
 	public static final int BASS_DATA_FFT_REMOVEDC = 0x40;	// FFT flag: pre-remove DC bias
 	public static final int BASS_DATA_FFT_COMPLEX = 0x80;	// FFT flag: return complex data
+	public static final int BASS_DATA_FFT_NYQUIST = 0x100;	// FFT flag: return extra Nyquist value
 
 	// BASS_ChannelGetLevelEx flags
 	public static final int BASS_LEVEL_MONO = 1;

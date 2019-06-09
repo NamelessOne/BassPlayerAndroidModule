@@ -4,7 +4,16 @@ import android.os.Environment
 import android.os.Handler
 import com.un4seen.bass.BASS
 import com.un4seen.bass.BASS_AAC
-import ru.sigil.bassplayerlib.listeners.*
+import ru.sigil.bassplayerlib.listeners.IAuthorChangedListener
+import ru.sigil.bassplayerlib.listeners.IBufferingProgressListener
+import ru.sigil.bassplayerlib.listeners.IEndSyncListener
+import ru.sigil.bassplayerlib.listeners.IPlayStateChangedListener
+import ru.sigil.bassplayerlib.listeners.IPlayerErrorListener
+import ru.sigil.bassplayerlib.listeners.IRecStateChangedListener
+import ru.sigil.bassplayerlib.listeners.IStreamChangedListener
+import ru.sigil.bassplayerlib.listeners.ISyncStallListener
+import ru.sigil.bassplayerlib.listeners.ITitleChangedListener
+import ru.sigil.bassplayerlib.listeners.IVolumeChangedListener
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -52,24 +61,18 @@ class Player<T : IRadioStream>(private val mp3Collection: ITracksCollection, pri
     override var title: String? = null
         private set(value) {
             field = value
-            for (listener in titleChangedListeners) {
-                listener.onTitleChanged(title!!)
-            }
+            titleChangedListeners.forEach { l -> l.onTitleChanged(title!!) }
         }
     override var author: String? = null
         private set(value) {
             field = value
-            for (listener in authorChangedEventListeners) {
-                listener.onAuthorChanged(author!!)
-            }
+            authorChangedEventListeners.forEach { l -> l.onAuthorChanged(author!!) }
         }
 
     override var playState = PlayState.STOP
         private set(value) {
             field = value
-            for (listener in playStateChangedListeners) {
-                listener.onPlayStateChanged(value)
-            }
+            playStateChangedListeners.forEach { l -> l.onPlayStateChanged(value) }
             if (value != PlayState.PLAY && value != PlayState.BUFFERING) {
                 isRecActive = false
             }
@@ -80,9 +83,7 @@ class Player<T : IRadioStream>(private val mp3Collection: ITracksCollection, pri
     override var isRecActive: Boolean = false
         private set(value) {
             field = value
-            for (listener in recStateChangedListeners) {
-                listener.onRecStateChanged(value)
-            }
+            recStateChangedListeners.forEach { l -> l.onRecStateChanged(value) }
         }
 
     override var currentMP3Entity: ITrack? = null
@@ -95,9 +96,7 @@ class Player<T : IRadioStream>(private val mp3Collection: ITracksCollection, pri
         get() = BASS.BASS_GetVolume()
         set(value) {
             BASS.BASS_SetVolume(value)
-            for (listener in volumeChangedListeners) {
-                listener.onVolumeChanged(value)
-            }
+            volumeChangedListeners.forEach { l -> l.onVolumeChanged(value) }
         }
 
     override var progress: Long
@@ -114,9 +113,7 @@ class Player<T : IRadioStream>(private val mp3Collection: ITracksCollection, pri
         get() = BASS.BASS_ChannelIsActive(chan) == BASS.BASS_ACTIVE_PAUSED
 
     override val fileLength: Long
-        get() {
-                return BASS.BASS_ChannelGetLength(chan, BASS.BASS_POS_BYTE)
-        }
+        get() = BASS.BASS_ChannelGetLength(chan, BASS.BASS_POS_BYTE)
 
     override fun rec(isActive: Boolean) {
         // -------------------------------------
@@ -167,11 +164,8 @@ class Player<T : IRadioStream>(private val mp3Collection: ITracksCollection, pri
         }
     }
 
-    private fun error(message: String, code: Int, exception: Exception?) {
-        for (listener in playerErrorEventListeners) {
-            listener.onError(message, code, exception)
-        }
-    }
+    private fun error(message: String, code: Int, exception: Exception?) =
+            playerErrorEventListeners.forEach { l -> l.onError(message, code, exception) }
 
     override fun playFile(file: ITrack) {
         author = if (file.artist == null) "" else file.artist
